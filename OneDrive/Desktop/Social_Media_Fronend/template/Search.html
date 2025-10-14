@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search & Online Users</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background: linear-gradient(90deg, #ff69b4, #8a2be2, #1e90ff);
+            animation: gradientFlow 10s infinite linear alternate;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        @keyframes gradientFlow {
+            0% { background-position: left; }
+            100% { background-position: right; }
+        }
+        .search-container {
+            width: 300px;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .user-list {
+            width: 300px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .user {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .user:last-child {
+            border-bottom: none;
+        }
+        .online {
+            width: 10px;
+            height: 10px;
+            background: green;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .user a {
+            text-decoration: none;
+            color: black;
+            font-weight: bold;
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <input type="text" placeholder="Search users...">
+    </div>
+    <div class="user-list">
+        <div class="user"><div class="online"></div> <a href="profile1.html">User 1</a></div>
+        <div class="user"><div class="online"></div> <a href="profile2.html">User 2</a></div>
+        <div class="user"><div class="online"></div> <a href="profile3.html">User 3</a></div>
+    </div>
+</body>
+</html>

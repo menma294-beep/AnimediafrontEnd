@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Posts with Comments Modal</title>
+  <style>
+    body {
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      background: white;
+      width: 400px;
+      height: 500px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .post {
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .profile-pic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: gray;
+    }
+
+    .post-author {
+      font-weight: bold;
+    }
+
+    .post-date {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .post-content {
+      margin-top: 5px;
+      line-height: 1.4;
+      font-size: 14px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .actions {
+      margin-top: 8px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .actions button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #555;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+
+    .actions button:hover {
+      background: #e0e0e0;
+      color: black;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      width: 400px;
+      height: 400px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .modal-header {
+      padding: 10px;
+      font-weight: bold;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .close-btn {
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .comment-list {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    .comment {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .comment .profile-pic {
+      width: 30px;
+      height: 30px;
+    }
+
+    .comment .username {
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    .comment .text {
+      font-size: 13px;
+      color: #333;
+    }
+
+    .comment-input {
+      border-top: 1px solid #ddd;
+      padding: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .comment-input input {
+      flex: 1;
+      padding: 5px;
+    }
+
+    .comment-input button {
+      padding: 5px 10px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .comment-input button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Post 1 -->
+    <div class="post">
+      <div class="post-header">
+        <div class="profile-pic"></div>
+        <div>
+          <div class="post-author">John Doe</div>
+          <div class="post-date">October 4, 2025</div>
+        </div>
+      </div>
+      <div class="post-content">This is the first sample post with comments.</div>
+      <div class="actions">
+        <button>Like</button>
+        <button onclick="openComments(1)">Comment</button>
+      </div>
+    </div>
+
+    <!-- Post 2 -->
+    <div class="post">
+      <div class="post-header">
+        <div class="profile-pic"></div>
+        <div>
+          <div class="post-author">Jane Smith</div>
+          <div class="post-date">October 4, 2025</div>
+        </div>
+      </div>
+      <div class="post-content">This is the second post with a different set of comments.</div>
+      <div class="actions">
+        <button>Like</button>
+        <button onclick="openComments(2)">Comment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="commentModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        Comments
+        <span class="close-btn" onclick="closeComments()">&times;</span>
+      </div>
+      <div class="comment-list" id="commentList">
+        <!-- Comments will load here -->
+      </div>
+      <div class="comment-input">
+        <input type="text" placeholder="Write a comment...">
+        <button>Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Dummy data for each post
+    const commentsData = {
+      1: [
+        {author_username: "Alice", content: "Nice post!"},
+        {author_username: "Bob", content: "I totally agree with this."}
+      ],
+      2: [
+        {author_username: "Charlie", content: "Very insightful."},
+        {author_username: "Dana", content: "Thanks for sharing!"},
+        {author_username: "Eve", content: "I learned something new today."}
+      ]
+    };
+
+    function openComments(postId) {
+      const modal = document.getElementById("commentModal");
+      const commentList = document.getElementById("commentList");
+
+      modal.style.display = "flex";
+      commentList.innerHTML = ""; // clear old data
+
+      // Load comments for the selected post
+      const postComments = commentsData[postId] || [];
+      postComments.forEach(c => {
+        const div = document.createElement("div");
+        div.classList.add("comment");
+        div.innerHTML = `
+          <div class="profile-pic"></div>
+          <div>
+            <div class="username">${c.author_username}</div>
+            <div class="text">${c.content}</div>
+          </div>
+        `;
+        commentList.appendChild(div);
+      });
+    }
+
+    function closeComments() {
+      const modal = document.getElementById("commentModal");
+      const commentList = document.getElementById("commentList");
+      modal.style.display = "none";
+      commentList.innerHTML = ""; // ✅ clear old comments
+    }
+  </script>
+</body>
+</html>

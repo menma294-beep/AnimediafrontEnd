@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background: linear-gradient(90deg, #ff69b4, #8a2be2, #1e90ff);
+            animation: gradientFlow 10s infinite linear alternate;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
+        @keyframes gradientFlow {
+            0% { background-position: left; }
+            100% { background-position: right; }
+        }
+        .navbar {
+            background: white;
+            width: 100%;
+            max-width: 1100px;
+            height: 50px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .navbar .app-name {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .navbar .nav-links a {
+            text-decoration: none;
+            color: black;
+            padding: 5px 10px;
+        }
+        .container-wrapper {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .container {
+            background: white;
+            width: 350px;
+            height: 500px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        .split-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .split-container .container {
+            height: 240px;
+        }
+        .search-container {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .user-list {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .user {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .user:last-child {
+            border-bottom: none;
+        }
+        .online {
+            width: 10px;
+            height: 10px;
+            background: green;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .user a {
+            text-decoration: none;
+            color: black;
+            font-weight: bold;
+            flex-grow: 1;
+        }
+        .profile-pic {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: gray;
+        }
+        .feed {
+            margin-top: 20px;
+        }
+        .post {
+            background: #f1f1f1;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .notification {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .notification:last-child {
+            border-bottom: none;
+        }
+        .unread {
+            font-weight: bold;
+            background: #f0f0f0;
+        }
+        .mark-read {
+            background: #1e90ff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="app-name">SocialMed</div>
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Search</a>
+            <a href="#">Messages</a>
+            <a href="#">Notifications</a>
+            <a href="#">Profile</a>
+        </div>
+    </div>
+    <div class="container-wrapper">
+        <div class="container">
+            <div class="search-container">
+                <input type="text" placeholder="Search users...">
+            </div>
+            <div class="user-list">
+                <div class="user"><div class="online"></div> <a href="profile1.html">User 1</a></div>
+                <div class="user"><div class="online"></div> <a href="profile2.html">User 2</a></div>
+                <div class="user"><div class="online"></div> <a href="profile3.html">User 3</a></div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="feed">
+                <div class="post">
+                    <div class="profile-pic"></div>
+                    <p><strong>Username</strong></p>
+                    <p>Sample post content here...</p>
+                </div>
+                <div class="post">
+                    <div class="profile-pic"></div>
+                    <p><strong>Another User</strong></p>
+                    <p>Another post content here...</p>
+                </div>
+            </div>
+        </div>
+        <div class="split-container">
+            <div class="container"></div>
+            <div class="container">
+                <h2>Notifications</h2>
+                <div class="notification unread">User1 liked your post.</div>
+                <div class="notification unread">User2 commented on your post.</div>
+                <div class="notification">User3 sent you a message.</div>
+                <button class="mark-read" onclick="markAllAsRead()">Mark All as Read</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function markAllAsRead() {
+            document.querySelectorAll('.notification').forEach(notification => {
+                notification.classList.remove('unread');
+                notification.style.background = 'transparent';
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <link rel="stylesheet" href="../static/styles_create_account.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="app-name">SocialMed</div>
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Search</a>
+            <a href="#">Messages</a>
+            <a href="#">Profile</a>
+        </div>
+    </div>
+    <div class="container-wrapper">
+        <!-- Search Users -->
+        <div class="container search-container-wrapper">
+            <div class="search-container">
+                <input type="text" placeholder="Search users...">
+            </div>
+            <div class="user-list">
+                <div class="user"><div class="online"></div> <a href="#">User 1</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 2</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 3</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 1</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 2</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 3</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 1</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 2</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 3</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 1</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 2</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 3</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 1</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 2</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 3</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 1</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 2</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 3</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 1</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 2</a></div>
+                <div class="user"><div class="online"></div> <a href="#">User 3</a></div>
+                
+            </div>
+        </div>
+    
+        <!-- Feed -->
+        <!-- Feed -->
+<div class="container feed-container">
+    <div class="feed" id="feed">
+        <div class="post">
+            <div class="post-header">
+                <strong>User A</strong> <span>· 2h ago</span>
+            </div>
+            <p>This is the first sample post. Just testing the scroll feature.</p>
+            <div class="actions">
+                <button onclick="likePost(1, this)">Like</button>
+                <button onclick="commentPost(1)">Comment</button>
+            </div>
+        </div>
+
+        <div class="post">
+            <div class="post-header">
+                <strong>User B</strong> <span>· 3h ago</span>
+            </div>
+            <p>Another post goes here. Still testing the layout and scroll behavior.</p>
+            <div class="actions">
+                <button onclick="likePost(2, this)">Like</button>
+                <button onclick="commentPost(2)">Comment</button>
+            </div>
+        </div>
+
+        <div class="post">
+            <div class="post-header">
+                <strong>User C</strong> <span>· 5h ago</span>
+            </div>
+            <p>This is the third sample post. A little longer text to see wrapping inside the container.</p>
+            <div class="actions">
+                <button onclick="likePost(3, this)">Like</button>
+                <button onclick="commentPost(3)">Comment</button>
+            </div>
+        </div>
+
+        <div class="post">
+            <div class="post-header">
+                <strong>User D</strong> <span>· 1d ago</span>
+            </div>
+            <p>Fourth post here! Let's see how multiple posts stack up inside the fixed-height feed container.</p>
+            <div class="actions">
+                <button onclick="likePost(4, this)">Like</button>
+                <button onclick="commentPost(4)">Comment</button>
+            </div>
+        </div>
+
+        <div class="post">
+            <div class="post-header">
+                <strong>User E</strong> <span>· 2d ago</span>
+            </div>
+            <p>Finally, the fifth post. This should trigger the scrollbar so we can test scrolling.</p>
+            <div class="actions">
+                <button onclick="likePost(5, this)">Like</button>
+                <button onclick="commentPost(5)">Comment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+        <!-- Right side -->
+        <div class="split-container">
+            <!-- Create Post (auto height) -->
+            <div class="container">
+                <h2>Create a Post</h2>
+                <textarea id="postContent" placeholder="What's on your mind?"></textarea>
+                <input type="file" accept="image/*" style="margin-bottom:10px;">
+                <button onclick="createPost()">Post</button>
+            </div>
+    
+            <!-- Extra -->
+            <div class="container extra-container">
+                <h2>Extra</h2>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Backend URL
+        const frontendHost = window.location.hostname;
+        const backendPort = 8000; // FastAPI backend port
+        const API_BASE_URL = `http://${frontendHost}:${backendPort}`;
+    
+        // Auth guard: prevent access without login
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("You must log in first!");
+            window.location.href = "index.html"; // redirect back to login page
+        }
+    
+        async function createPost() {
+            const content = document.getElementById("postContent").value.trim();
+            if (!content) {
+                alert("Post content cannot be empty!");
+                return;
+            }
+    
+            try {
+                const response = await fetch(`${API_BASE_URL}/posts/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+    
+                if (!response.ok) throw new Error("Failed to create post");
+    
+                const data = await response.json();
+                alert("Post created successfully!");
+                console.log("Created post:", data);
+    
+                // Optionally, refresh the feed after creating post
+                fetchPosts();
+                document.getElementById("postContent").value = ""; // clear textarea
+            } catch (err) {
+                console.error(err);
+                alert("Error creating post: " + err.message);
+            }
+        }
+    
+        
+        
+          function likePost(id, btn){
+              btn.innerText = "Liked";
+              btn.style.color = "red";
+          }
+        
+          function commentPost(id){
+              alert("Comment clicked for post " + id);
+          }
+        
+          fetchPosts();
+    </script>
+    
+
+</body>
+</html>
