@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="static/test.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-sidebar">
+            <h2>Active Users</h2>
+            <ul id="active-users">
+                <!-- List of active users will be displayed here -->
+            </ul>
+        </div>
+        <div class="chat-main">
+            <div class="chat-header">
+                <h1>Chat Room</h1>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <!-- Display messages from the database -->
+                {% for message in messages %}
+                    <div class="message {% if message.user == request.user %}self{% endif %}">
+                        <span class="username">{{ message.user.username }}:</span>
+                        <span class="text">{{ message.content }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="chat-input">
+                <input type="hidden" id="room-id" value="{{ chat_room.id }}">
+                <input type="text" id="chat-input" placeholder="Type your message here...">
+                <button id="send-button">Send</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Function to add message to chat
+        function addMessage(username, message, isSelf) {
+            var messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            if (isSelf) {
+                messageDiv.classList.add('self');
+            }
+            messageDiv.innerHTML = '<span class="username">' + username + ':</span> <span class="text">' + message + '</span>';
+            document.getElementById('chat-messages').appendChild(messageDiv);
+            document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+        }
+    
+        // Function to update active users
+        function updateActiveUsers() {
+            fetch("{% url 'active_users' %}")
+                .then(response => response.json())
+                .then(users => {
+                    var activeUsersList = document.getElementById('active-users');
+                    activeUsersList.innerHTML = '';
+                    users.forEach(user => {
+                        var userItem = document.createElement('li');
+                        userItem.textContent = user.username;
+                        activeUsersList.appendChild(userItem);
+                    });
+                });
+        }
+    
+        // Update active users every 5 seconds
+        setInterval(updateActiveUsers, 50000);
+        updateActiveUsers();
+        // Send message on button click
+        document.getElementById('send-button').addEventListener('click', function() {
+            var inputField = document.getElementById('chat-input');
+            var message = inputField.value;
+            var roomId = document.getElementById('room-id').value;
+            console.log('Room ID: ',roomId);
+            console.log('Message: ', message);
+            if (message.trim() !== '') {
+                addMessage('You', message, true);
+
+                // Send the message to the backend
+                fetch('{% url 'send_message' %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        'content': message,
+                        'room_id': roomId
+                    })
+                }).then(response => response.json()).then(data => {
+                    console.log('Message sent', data);
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
+                // Clear the input field
+                inputField.value = '';
+            }
+        });    
+        // Initial update of active users
+        
+
+        function fetchMessages() {
+            var roomId = document.getElementById('room-id').value;
+        
+            fetch(`/chat/messages/${roomId}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }).then(response => response.json()).then(data => {
+                var messagesContainer = document.getElementById('chat-messages');
+                var isScrolledToBottom = messagesContainer.scrollHeight - messagesContainer.clientHeight <= messagesContainer.scrollTop + 1;
+        
+                // Clear the container only once at the start of the script
+                if (!messagesContainer.dataset.initialized) {
+                    messagesContainer.innerHTML = '';
+                    messagesContainer.dataset.initialized = true;
+                }
+        
+                data.messages.forEach(function(message) {
+                    var messageElement = document.createElement('div');
+                    messageElement.classList.add('chat-message');
+                    if (message.user === '{{ request.user.username }}') {
+                        messageElement.classList.add('chat-message-right');
+                    } else {
+                        messageElement.classList.add('chat-message-left');
+                    }
+                    messageElement.innerHTML = `
+                        <div>
+                            <img src="https://bootdey.com/img/Content/avatar/avatar${(data.messages.indexOf(message) % 5) + 1}.png" class="rounded-circle mr-1" alt="${message.user}" width="40" height="40">
+                            <div class="text-muted small text-nowrap mt-2">${new Date(message.timestamp).toLocaleTimeString()}</div>
+                        </div>
+                        <div class="flex-shrink-1 bg-light rounded py-2 px-3 ${message.user === '{{ request.user.username }}' ? 'mr-3' : 'ml-3'}">
+                            <div class="font-weight-bold mb-1">${message.user}</div>
+                            ${message.content}
+                        </div>`;
+                    messagesContainer.appendChild(messageElement);
+                });
+        
+                if (isScrolledToBottom) {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;  // Scroll to bottom
+                }
+            }).catch(error => {
+                console.error('Error fetching messages:', error);
+            });
+        }
+        
+        setInterval(fetchMessages, 70000);  // Fetch new messages every 2 seconds
+    </script>
+</body> 

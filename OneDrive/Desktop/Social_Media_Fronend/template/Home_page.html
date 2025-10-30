@@ -49,13 +49,23 @@
   <div class="container-wrapper">
       <!-- Left Side -->
       <div class="container search-container-wrapper">
-          <div class="search-container">
-              <input type="text" placeholder="Search users...">
-          </div>
-          <div class="user-list" id="activeUsersList">
-              
-          </div>
+        <div class="search-container" style="position: relative; display: flex; align-items: center;">
+          <input type="text" placeholder="Search users..." id="searchInput" style="width: 100%; padding-right: 25px;">
+          <span id="clearSearch" 
+                style="
+                  position: absolute; 
+                  right: 8px; 
+                  cursor: pointer; 
+                  font-size: 20px; 
+                  color: #888; 
+                  display: none;
+                ">
+            ×
+          </span>
+        </div>
+        <div class="user-list" id="activeUsersList"></div>
       </div>
+      
 
       <!-- Feed -->
       <div class="container feed-container">
@@ -64,12 +74,12 @@
 
       <!-- Right side -->
       <div class="split-container">
-          <div class="container">
-              <h2>Create a Post</h2>
-              <textarea id="postContent" placeholder="What's on your mind?"></textarea>
-              <input type="file" accept="image/*" style="margin-bottom:10px;">
-              <button onclick="createPost()">Post</button>
-          </div>
+        <div class="container">
+          <h2>Create a Post</h2>
+          <textarea id="postContent" placeholder="What's on your mind?"></textarea>
+          <input type="file" id="mediaFile" accept="image/*,video/*" style="margin-bottom:10px;">
+          <button onclick="createPost()">Post</button>
+        </div>
           <div class="container extra-container">
               <h2>Extra</h2>
           </div>
@@ -89,19 +99,13 @@
     </div>
   </div>
   
-  <script>
-   // call this after you set API_BASE_URL and token variables
-
-  // send a heartbeat to server
-  // When the user opens or reloads the page
+<script>
 window.addEventListener("DOMContentLoaded", async () => {
   if (!token) return;
   await markUserOnline();
-
   // Optional: refresh every 60s to keep presence alive
   window._presenceInterval = setInterval(markUserOnline, 60 * 1000);
 });
-
 // When the user closes or leaves the page
 window.addEventListener("beforeunload", async () => {
   try {
@@ -111,7 +115,6 @@ window.addEventListener("beforeunload", async () => {
   }
   clearInterval(window._presenceInterval);
 });
-
 // API calls
 async function markUserOnline() {
   await fetch("https://animediabackend.onrender.com/users/online", {
@@ -121,7 +124,6 @@ async function markUserOnline() {
     }
   });
 }
-
 async function markUserOffline() {
   await fetch("https://animediabackend.onrender.com/users/online", {
     method: "DELETE",
@@ -143,28 +145,22 @@ async function fetchActiveUsers() {
     const list = document.getElementById("activeUsersList");
     list.innerHTML = "";
 
-    // Decode your own user ID
     const payload = JSON.parse(atob(token.split(".")[1]));
     const currentUserId = payload.sub;
 
-    // Filter out yourself
     const filtered = data.filter(user => user.id !== currentUserId);
-
     if (filtered.length > 0) {
       filtered.forEach(user => {
         const div = document.createElement("div");
         div.className = "user-item";
-
         div.innerHTML = `
           <div class="online-dot"></div>
           <span>${user.username}</span>
           <button class="follow-btn" data-id="${user.id}">Follow</button>
         `;
-
         list.appendChild(div);
       });
 
-      // Attach event listeners to all follow buttons
       document.querySelectorAll(".follow-btn").forEach(btn => {
         btn.addEventListener("click", async (e) => {
           const targetUserId = e.target.getAttribute("data-id");
@@ -175,11 +171,70 @@ async function fetchActiveUsers() {
     } else {
       list.innerHTML = "<p>No other users online</p>";
     }
-
   } catch (error) {
     console.error("Error fetching active users:", error);
   }
 }
+
+// --- SEARCH FEATURE ---
+const searchInput = document.getElementById("searchInput");
+const clearBtn = document.getElementById("clearSearch");
+const userList = document.getElementById("activeUsersList");
+
+searchInput.addEventListener("input", async () => {
+  const query = searchInput.value.trim();
+
+  if (query === "") {
+    clearBtn.style.display = "none";
+    fetchActiveUsers();
+    return;
+  }
+
+  clearBtn.style.display = "inline";
+
+  try {
+    const response = await fetch(`http://127.0.0.1:8000/users/search?query=${encodeURIComponent(query)}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      userList.innerHTML = "<p>No users found</p>";
+      return;
+    }
+
+    const results = await response.json();
+    userList.innerHTML = "";
+
+    results.forEach(user => {
+      const div = document.createElement("div");
+      div.className = "user-item";
+      div.innerHTML = `
+        <span>${user.username}</span>
+        <button class="follow-btn" data-id="${user.id}">Follow</button>
+      `;
+      userList.appendChild(div);
+    });
+
+    document.querySelectorAll(".follow-btn").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        const targetUserId = e.target.getAttribute("data-id");
+        await followUser(targetUserId, e.target);
+      });
+    });
+
+  } catch (err) {
+    console.error("Search error:", err);
+    userList.innerHTML = "<p>Error searching users</p>";
+  }
+});
+
+clearBtn.addEventListener("click", () => {
+  searchInput.value = "";
+  clearBtn.style.display = "none";
+  fetchActiveUsers();
+});
 
 async function followUser(targetUserId, buttonElement) {
   try {
@@ -191,44 +246,30 @@ async function followUser(targetUserId, buttonElement) {
       },
       body: JSON.stringify({ target_user_id: targetUserId })
     });
-
     if (!response.ok) {
       throw new Error("Failed to follow user");
     }
-
     const result = await response.json();
     console.log("Follow result:", result);
-
     // Update button UI
     buttonElement.textContent = "Following ✅";
     buttonElement.disabled = true;
     buttonElement.classList.add("following");
-
   } catch (error) {
     console.error("Error following user:", error);
   }
 }
-
-
-
 // Refresh the active users list every 10 seconds
 setInterval(fetchActiveUsers, 10000);
 fetchActiveUsers(); // load immediately on page load
-
-
-
-
-    
     const frontendHost = window.location.hostname;
     const backendPort = 8000;
     const API_BASE_URL = `http://${frontendHost}:${backendPort}`;
     const token = localStorage.getItem("token");
-  
     if (!token) {
       alert("You must log in first!");
       window.location.href = "index.html";
     }
-  
     // Robust JWT parser (handles base64url)
     function parseJwt(t) {
       try {
@@ -242,20 +283,11 @@ fetchActiveUsers(); // load immediately on page load
         return null;
       }
     }
-  
     function getCurrentUserId() {
       const payload = parseJwt(token);
       // Common claim names to check
       return payload?.sub || payload?.user_id || payload?.id || null;
     }
-  
-
-
-
-
-
-
-
     async function fetchJson(url, opts = {}) {
       try {
         const res = await fetch(url, opts);
@@ -265,8 +297,7 @@ fetchActiveUsers(); // load immediately on page load
         console.warn("fetchJson error:", e);
         return null;
       }
-    }
-    
+    }  
     // ---- helper: normalize the react summary returned by backend ----
     async function fetchReactSummary(postId) {
       // endpoint may return either an object like { post_id, reacts, has_liked, like_count }
@@ -274,13 +305,11 @@ fetchActiveUsers(); // load immediately on page load
       const summary = await fetchJson(`https://animediabackend.onrender.com/reacts/post/${postId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
-      if (!summary) return { reacts: [], like_count: 0, has_liked: false };
-    
+      if (!summary) return { reacts: [], like_count: 0, has_liked: false };    
       if (Array.isArray(summary)) {
         // older shape: array of react objects
         return { reacts: summary, like_count: summary.length, has_liked: false };
-      }
-    
+      }    
       // assume object with fields; defensive defaults:
       return {
         reacts: Array.isArray(summary.reacts) ? summary.reacts : [],
@@ -288,20 +317,6 @@ fetchActiveUsers(); // load immediately on page load
         has_liked: !!summary.has_liked
       };
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // helper to fetch and normalize JSON result to array
     async function fetchJsonArray(url, opts = {}) {
       try {
@@ -318,7 +333,6 @@ fetchActiveUsers(); // load immediately on page load
         return [];
       }
     }
-  
     async function addComment() {
       const content = document.getElementById("newComment").value.trim();
       if (!content || !currentPostId) return;
@@ -339,34 +353,62 @@ fetchActiveUsers(); // load immediately on page load
         alert("Error adding comment: " + err.message);
       }
     }
-  
     async function createPost() {
       const content = document.getElementById("postContent").value.trim();
-      if (!content) {
-        alert("Post content cannot be empty!");
+      const fileInput = document.getElementById("mediaFile");
+      const file = fileInput.files[0];
+      
+      if (!content && !file) {
+        alert("Post content or media is required!");
         return;
       }
+  
       try {
-        const response = await fetch("https://animediabackend.onrender.com/posts/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify({ content })
-        });
+        let response;
+  
+        if (file) {
+          // --- If user uploaded a file, use FormData ---
+          const formData = new FormData();
+          formData.append("file", file);
+          if (content) formData.append("content", content);
+  
+          response = await fetch("https://animediabackend.onrender.com/posts/media", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`
+            },
+            body: formData
+          });
+        } else {
+          // --- Text-only post ---
+          response = await fetch("https://animediabackend.onrender.com/posts/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ content })
+          });
+        }
+  
         if (!response.ok) throw new Error("Failed to create post");
-        fetchPosts();
+  
+        // Clear inputs after successful post
         document.getElementById("postContent").value = "";
+        fileInput.value = "";
+  
+        // Refresh feed
+        fetchPosts();
+  
       } catch (err) {
         console.error(err);
         alert("Error creating post: " + err.message);
       }
     }
-  
     async function fetchPosts() {
       const feed = document.getElementById('feed');
       feed.innerHTML = '';
+    
       try {
         const response = await fetch("https://animediabackend.onrender.com/posts/", {
           method: "GET",
@@ -375,17 +417,19 @@ fetchActiveUsers(); // load immediately on page load
             "Authorization": `Bearer ${token}`
           }
         });
+    
         if (!response.ok) throw new Error(`Error: ${response.status}`);
         const posts = await response.json();
+    
         if (!Array.isArray(posts) || posts.length === 0) {
           feed.innerHTML = "<p>No posts yet!</p>";
           return;
         }
     
-        const currentUser = getCurrentUserId(); // should return user id string or null
+        const currentUser = getCurrentUserId(); // should return user id string or null  
     
         for (const post of posts) {
-          // parse created_at (your existing logic)
+          // parse created_at
           const dateObj = post.created_at;
           const year = dateObj._DateTime__date._Date__year;
           const month = dateObj._DateTime__date._Date__month - 1;
@@ -397,12 +441,28 @@ fetchActiveUsers(); // load immediately on page load
     
           // fetch react summary
           const summary = await fetchReactSummary(post.id);
-          // If backend provides has_liked, prefer it; otherwise check reacts array for current user id
+    
+          // Determine like count and state
           const reactsCount = summary.like_count ?? (summary.reacts ? summary.reacts.length : 0);
           const userReacted = (typeof summary.has_liked === 'boolean')
             ? summary.has_liked
             : (currentUser ? summary.reacts.some(r => r.user_id === currentUser) : false);
     
+          // handle media display (image or video)
+          const mediaHTML = post.media_url
+            ? post.media_type === "image"
+              ? `<img src="${post.media_url}" alt="Post media" class="post-media" 
+                  style="max-width: 100%; border-radius: 10px; margin-top: 8px;" />`
+              : post.media_type === "video"
+                ? `<video controls class="post-media" 
+                    style="max-width: 100%; border-radius: 10px; margin-top: 8px;">
+                     <source src="${post.media_url}" type="video/mp4">
+                     Your browser does not support the video tag.
+                   </video>`
+                : ""
+            : "";
+    
+          // create post element
           const postElement = document.createElement('div');
           postElement.classList.add('post');
           postElement.innerHTML = `
@@ -414,6 +474,7 @@ fetchActiveUsers(); // load immediately on page load
               </div>
             </div>
             <div class="post-content">${post.content}</div>
+            ${mediaHTML}
             <div class="actions">
               <button id="like-btn-${post.id}" style="color:${userReacted ? 'red' : 'black'}">
                 ${userReacted ? 'Liked' : 'Like'}
@@ -424,6 +485,7 @@ fetchActiveUsers(); // load immediately on page load
               <button onclick="commentPost('${post.id}')">Comment</button>
             </div>
           `;
+    
           feed.appendChild(postElement);
     
           // attach like toggle handler
@@ -436,9 +498,6 @@ fetchActiveUsers(); // load immediately on page load
       }
     }
     
-    
-    // Toggle like/unlike
-    // ---- toggle like/unlike ----
 async function toggleLike(postId, btn) {
   try {
     const currentUser = getCurrentUserId();
@@ -446,12 +505,10 @@ async function toggleLike(postId, btn) {
       alert("Can't determine current user"); 
       return; 
     }
-
     const summary = await fetchReactSummary(postId);
     const userReacted = summary.has_liked === true;
     const countEl = document.getElementById(`react-count-${postId}`);
     let currentCount = parseInt(countEl?.textContent || "0", 10);
-
     if (userReacted) {
       // user already liked → send unlike
       const res = await fetch(`${API_BASE_URL}/reacts/unlike`, {
@@ -461,8 +518,7 @@ async function toggleLike(postId, btn) {
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({ target_id: postId, react_type: "like" }) // ✅ add react_type
-      });
-    
+      });  
       if (!res.ok) throw new Error("Failed to unlike");
       btn.innerText = "Like";
       btn.style.color = "black";
@@ -478,28 +534,21 @@ async function toggleLike(postId, btn) {
         },
         body: JSON.stringify({ target_id: postId, react_type: "like" })
       });
-
       if (!res.ok) throw new Error("Failed to like");
       btn.innerText = "Liked";
       btn.style.color = "red";
       countEl.textContent = currentCount + 1;
     }
-
   } catch (err) {
     console.error(err);
     alert("Error toggling like: " + err.message);
   }
 }
-
-  
-    // Comment functions unchanged...
-    let currentPostId = null;
-  
+    let currentPostId = null; 
     async function commentPost(postId) {
       currentPostId = postId;
       const commentList = document.getElementById("commentList");
       commentList.innerHTML = "";
-  
       try {
         const response = await fetch(`https://animediabackend.onrender.com/comments/post/${postId}`, {
           method: "GET",
@@ -510,7 +559,6 @@ async function toggleLike(postId, btn) {
         });
         if (!response.ok) throw new Error("Failed to fetch comments");
         const comments = await response.json();
-  
         if (comments.length === 0) {
           commentList.innerHTML = "<p>No comments yet!</p>";
         } else {
@@ -527,28 +575,22 @@ async function toggleLike(postId, btn) {
             commentList.appendChild(div);
           });
         }
-  
         document.getElementById("commentModal").style.display = "flex";
       } catch (err) {
         console.error(err);
         alert("Error loading comments: " + err.message);
       }
-    }
-  
+    } 
     function closeModal() {
       const modal = document.getElementById("commentModal");
       modal.style.display = "none";
       document.getElementById("commentList").innerHTML = "";
       document.getElementById("newComment").value = "";
     }
-  
-    // Reactors modal (unchanged)
-    // ---- openReactors: show modal with list of users who reacted ----
 async function openReactors(postId) {
   try {
     const summary = await fetchReactSummary(postId);
     const users = summary.reacts || [];
-
     const modal = document.createElement("div");
     modal.classList.add("modal");
     modal.style.display = "flex";
@@ -563,7 +605,6 @@ async function openReactors(postId) {
     `;
     document.body.appendChild(modal);
     const reactorList = modal.querySelector("#reactorList");
-
     if (!Array.isArray(users) || users.length === 0) {
       reactorList.innerHTML = "<p>No reactions yet!</p>";
     } else {
@@ -585,67 +626,50 @@ async function openReactors(postId) {
     alert("Failed to load reactors: " + err.message);
   }
 }
-  
     // initial load
     fetchPosts();
-
   ;
-
-
-
   async function loadNotifications() {
     try {
       const token = localStorage.getItem("token"); // assuming you stored it at login
-  
       if (!token) {
         console.warn("No token found. Please log in first.");
         return;
       }
-  
       const response = await fetch("https://animediabackend.onrender.com/notifications/", {
         headers: {
           "Authorization": `Bearer ${token}`
         }
       });
-  
       if (response.status === 403) {
         throw new Error("Access forbidden — invalid or missing token.");
       }
       if (!response.ok) {
         throw new Error("Failed to fetch notifications.");
       }
-  
       const notifications = await response.json();
       const extraContainer = document.querySelector(".extra-container");
-  
-      extraContainer.innerHTML = "<h2>Notifications</h2>";
-  
+      extraContainer.innerHTML = "<h2>Notifications</h2>"; 
       if (notifications.length === 0) {
         extraContainer.innerHTML += "<p>No notifications yet.</p>";
         return;
       }
-  
       notifications.forEach(notif => {
         const notifDiv = document.createElement("div");
         notifDiv.classList.add("notification-item");
         notifDiv.style.padding = "10px";
-        notifDiv.style.borderBottom = "1px solid #ccc";
-  
+        notifDiv.style.borderBottom = "1px solid #ccc"; 
         notifDiv.innerHTML = `
           <p><strong>${notif.sender_username}</strong>: ${notif.message}</p>
           <small>${new Date(notif.created_at).toLocaleString()}</small>
         `;
-  
         extraContainer.appendChild(notifDiv);
       });
     } catch (error) {
       console.error("Error loading notifications:", error);
     }
-  }
-  
+  } 
   window.addEventListener("DOMContentLoaded", loadNotifications);
   </script>
-  
-  
 </body>
 </html>

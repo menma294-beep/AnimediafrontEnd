@@ -1,0 +1,333 @@
+/* ===== Base Styles ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+  }
+  
+  body {
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.3s, color 0.3s;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  :root[data-theme="light"] {
+    --bg: #f2f4f8;
+    --text: #222;
+    --glass-bg: rgba(255, 255, 255, 0.4);
+    --border: rgba(0, 0, 0, 0.1);
+    --input-bg: rgba(255, 255, 255, 0.6);
+    --btn-bg: rgba(0, 0, 0, 0.1);
+  }
+  
+  :root[data-theme="dark"] {
+    --bg: #0f172a;
+    --text: #f8fafc;
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --border: rgba(255, 255, 255, 0.1);
+    --input-bg: rgba(255, 255, 255, 0.15);
+    --btn-bg: rgba(255, 255, 255, 0.2);
+  }
+  
+  /* ===== Layout ===== */
+  .container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  /* ===== Sidebar ===== */
+  .sidebar {
+    width: 240px;
+    background: var(--glass-bg);
+    border-right: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+  }
+  
+  .logo {
+    font-weight: 700;
+    font-size: 1.4rem;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .sidebar nav button {
+    width: 100%;
+    margin: 0.4rem 0;
+    padding: 0.6rem;
+    border: none;
+    border-radius: 10px;
+    background: var(--btn-bg);
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+  }
+  
+  .sidebar nav button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.03);
+  }
+  
+  .theme-btn {
+    align-self: center;
+    background: var(--btn-bg);
+    padding: 0.6rem;
+    border-radius: 50%;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .theme-btn:hover {
+    transform: rotate(20deg);
+  }
+  
+  /* ===== Main Content ===== */
+  .main-content {
+    flex: 1;
+    padding: 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  
+  .topbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+  }
+  
+  .topbar input {
+    width: 250px;
+    padding: 0.5rem;
+    border-radius: 20px;
+    border: none;
+    background: var(--input-bg);
+    color: var(--text);
+  }
+  
+  /* ===== Create Post ===== */
+  .create-post {
+    display: flex;
+    flex-direction: column;
+    background: var(--glass-bg);
+    border-radius: 15px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(10px);
+  }
+  
+  .create-post textarea {
+    resize: none;
+    border: none;
+    border-radius: 10px;
+    background: var(--input-bg);
+    padding: 0.8rem;
+    color: var(--text);
+    font-size: 1rem;
+    min-height: 70px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .create-post button {
+    align-self: flex-end;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 10px;
+    background: var(--btn-bg);
+    cursor: pointer;
+    color: var(--text);
+    transition: background 0.3s, transform 0.2s;
+  }
+  
+  .create-post button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.03);
+  }
+  
+  /* ===== Feed ===== */
+  .feed {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .post {
+    background: var(--glass-bg);
+    border-radius: 15px;
+    padding: 1rem;
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    transition: transform 0.2s, background 0.3s;
+  }
+  
+  .post:hover {
+    transform: translateY(-3px);
+  }
+  
+  .post-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+  }
+  
+  .post-content {
+    margin: 0.6rem 0;
+  }
+  
+  .post-actions {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .post-actions button {
+    background: var(--btn-bg);
+    border: none;
+    border-radius: 10px;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    color: var(--text);
+    transition: background 0.3s, transform 0.2s;
+  }
+  
+  .post-actions button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+  }
+  
+  /* ===== Extra Container ===== */
+  .extra-container {
+    width: 300px;
+    background: var(--glass-bg);
+    border-left: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    padding: 1rem;
+    overflow-y: auto;
+  }
+  
+  .extra-container h3 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .notifications ul,
+  .active-users ul {
+    list-style: none;
+  }
+  
+  .notifications li,
+  .active-users li {
+    background: var(--input-bg);
+    border-radius: 8px;
+    padding: 0.4rem 0.6rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  /* ===== Modals ===== */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+  }
+  
+  .modal-content {
+    background: var(--glass-bg);
+    padding: 1rem 1.5rem;
+    border-radius: 15px;
+    width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    border: 1px solid var(--border);
+  }
+  
+  .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+    font-size: 1.3rem;
+  }
+  
+  /* ===== Responsive ===== */
+  @media (max-width: 900px) {
+    .extra-container {
+      display: none;
+    }
+  
+    .sidebar {
+      width: 70px;
+      padding: 0.5rem;
+    }
+  
+    .sidebar nav button {
+      font-size: 0.8rem;
+    }
+  
+    .main-content {
+      padding: 1rem;
+    }
+  }
+  /* --- Post Action Buttons (Like, Comment, View Reactors) --- */
+.post-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .post-actions button {
+    flex: 1;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Hover effects */
+  .post-actions button:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateY(-2px);
+  }
+  
+  /* Active (clicked) effect */
+  .post-actions button:active {
+    transform: scale(0.97);
+  }
+  
+  /* Specific color highlights */
+  .like-btn {
+    color: #ff5b5b;
+  }
+  
+  .comment-btn {
+    color: #4db8ff;
+  }
+  
+  .view-reactors-btn {
+    color: #ffa94d;
+  }
+  
