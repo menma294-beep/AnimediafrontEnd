@@ -193,7 +193,7 @@ searchInput.addEventListener("input", async () => {
   clearBtn.style.display = "inline";
 
   try {
-    const response = await fetch(`http://127.0.0.1:8000/users/search?query=${encodeURIComponent(query)}`, {
+    const response = await fetch(`https://animediabackend.onrender.com/users/search?query=${encodeURIComponent(query)}`, {
       headers: {
         "Authorization": `Bearer ${token}`
       }
